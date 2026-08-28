@@ -1,0 +1,84 @@
+#!/bin/sh
+
+set -eu
+
+title="Hyprland keybindings"
+
+if ! bindings_json="$(hyprctl binds -j 2>/dev/null)"; then
+    printf "Could not read current Hyprland keybindings with hyprctl.\n" |
+        wofi --show dmenu --prompt "$title" --width 900 --height 160
+    exit 1
+fi
+
+help_text="$(
+    printf "%s" "$bindings_json" | jq -r '
+        def hasflag($name): (.[$name] // false) == true;
+
+        def modnames:
+            (.modmask // 0) as $m
+            | [
+                if ($m % 2) >= 1 then "SHIFT" else empty end,
+                if (($m / 2 | floor) % 2) >= 1 then "CAPS" else empty end,
+                if (($m / 4 | floor) % 2) >= 1 then "CTRL" else empty end,
+                if (($m / 8 | floor) % 2) >= 1 then "ALT" else empty end,
+                if (($m / 16 | floor) % 2) >= 1 then "MOD2" else empty end,
+                if (($m / 32 | floor) % 2) >= 1 then "MOD3" else empty end,
+                if (($m / 64 | floor) % 2) >= 1 then "SUPER" else empty end,
+                if (($m / 128 | floor) % 2) >= 1 then "MOD5" else empty end
+            ]
+            | join(" + ");
+
+        def keyname:
+            if (.key // "") != "" then .key
+            elif (.keycode // 0) != 0 then "keycode:" + (.keycode | tostring)
+            else "(unknown)"
+            end;
+
+        def combo:
+            modnames as $mods
+            | keyname as $key
+            | if $mods == "" then $key else $mods + " + " + $key end;
+
+        def action:
+            [(.dispatcher // ""), (.arg // "")]
+            | map(select(. != ""))
+            | join(" ");
+
+        def flags:
+            [
+                if hasflag("locked") then "locked" else empty end,
+                if hasflag("mouse") then "mouse" else empty end,
+                if hasflag("repeat") or hasflag("repeating") then "repeat" else empty end
+            ]
+            | if length > 0 then " [" + join(", ") + "]" else "" end;
+
+        [
+            "KEYBINDING                         ACTION",
+            "------------------------------------------------------------",
+            (
+                .[]
+                | select((.dispatcher // "") != "")
+                | [
+                    combo,
+                    action + flags
+                  ]
+                | @tsv
+            )
+        ]
+        | .[]
+    ' | awk -F '\t' '
+        BEGIN { line = 0 }
+        NF == 2 {
+            printf "%-34s %s\n", $1, $2
+            next
+        }
+        { print }
+    '
+)"
+
+printf "%s\n" "$help_text" | wofi \
+    --show dmenu \
+    --prompt "$title" \
+    --width 1100 \
+    --height 760 \
+    --cache-file /dev/null

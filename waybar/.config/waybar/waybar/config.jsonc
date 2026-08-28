@@ -1,0 +1,6 @@
+// ~/.config/waybar/config
+[
+  //   { "include": ["~/.config/waybar/bar-left.jsonc"] },
+  { "include": ["~/.config/waybar/bar-top.jsonc"] }
+]
+

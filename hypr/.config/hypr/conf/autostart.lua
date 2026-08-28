@@ -1,0 +1,12 @@
+return function()
+    hl.on("hyprland.start", function()
+        hl.exec_cmd("kwalletd6 &")
+        hl.exec_cmd("waybar &")
+        hl.exec_cmd("hyprpaper &")
+        hl.exec_cmd("swaync &")
+        hl.exec_cmd("firefox &")
+        hl.exec_cmd("wl-paste --watch cliphist store &")
+        hl.exec_cmd("blueman-applet &")
+        hl.exec_cmd("signal-desktop --password-store=kwallet6")
+    end)
+end

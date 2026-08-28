@@ -1,0 +1,9 @@
+  {
+    "layer": "top",
+    "position": "left",
+    "width": 40,
+    "modules-left": [],
+    "modules-center": ["custom/launcher"],
+    "modules-right": ["bluetooth", "custom/lock"]
+  }
+  

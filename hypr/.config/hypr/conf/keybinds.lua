@@ -91,23 +91,39 @@ return function(programs)
     hl.bind(main_mod .. " + SHIFT + C", hl.dsp.exec_cmd(programs.chat))
     hl.bind(main_mod .. " + SHIFT + B", hl.dsp.exec_cmd("blueman-manager"))
 
-    -- TODO
-    -- Power-saver toggle: off by default. SUPER+SHIFT+P flips blur/shadow/animations.
-    local power_saver = false
-    local function apply_power_saver()
-        local state = power_saver and "false" or "true"
-        hl.exec_cmd("hyprctl keyword decoration:blur:enabled " .. state)
-        hl.exec_cmd("hyprctl keyword decoration:shadow:enabled " .. state)
-        hl.exec_cmd("hyprctl keyword animations:enabled " .. state)
-    
-        local icon = power_saver and "🔋" or "⚡"
-        hl.exec_cmd("echo '" .. icon .. "' > /tmp/power_saver_state")
-        hl.exec_cmd("pkill -RTMIN+8 waybar")  -- tell waybar to refresh this module
+    -- ============================================================
+    -- Hyprland Eco Mode
+    -- SUPER + SHIFT + P
+    -- ============================================================
+
+    local eco_mode = false
+
+    local function set_eco_mode(enabled)
+        eco_mode = enabled
+
+        if eco_mode then
+            -- Reduce GPU/compositor work
+            hl.exec_cmd("hyprctl keyword decoration:blur:enabled false")
+            hl.exec_cmd("hyprctl keyword decoration:shadow:enabled false")
+            hl.exec_cmd("hyprctl keyword animations:enabled false")
+
+            -- Waybar indicator
+            hl.exec_cmd("printf '🔋' > /tmp/eco_mode_state")
+        else
+            -- Restore normal desktop behaviour
+            hl.exec_cmd("hyprctl keyword decoration:blur:enabled true")
+            hl.exec_cmd("hyprctl keyword decoration:shadow:enabled true")
+            hl.exec_cmd("hyprctl keyword animations:enabled true")
+
+            -- Waybar indicator
+            hl.exec_cmd("printf '⚡' > /tmp/eco_mode_state")
+        end
+
+        -- Refresh Waybar
+        hl.exec_cmd("pkill -RTMIN+8 waybar")
     end
 
     hl.bind(main_mod .. " + SHIFT + P", function()
-        power_saver = not power_saver
-        apply_power_saver()
+        set_eco_mode(not eco_mode)
     end)
 end
-

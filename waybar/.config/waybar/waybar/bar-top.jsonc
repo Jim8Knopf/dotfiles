@@ -21,7 +21,6 @@
         "idle_inhibitor",
         "pulseaudio",
         "network",
-        "power-profiles-daemon",
         "cpu",
         "memory",
         "temperature",
@@ -30,7 +29,7 @@
         "hyprland/language",
         "battery",
         "battery#bat2",
-        "custom/power-saver",
+        "custom/eco-mode",
         "clock",
         "tray",
         "custom/power"
@@ -48,7 +47,7 @@
             "4": "",
             "5": "",
             "urgent": "",
-            "focused": "",
+            "active": "",
             "default": ""
         }
     },
@@ -158,21 +157,13 @@
     "battery#bat2": {
         "bat": "BAT2"
     },
-    "custom/power-saver": {
-    "exec": "cat /tmp/power_saver_state 2>/dev/null || echo ⚡",
-    "signal": 8,
-    "interval": "once"
-    },
-    "power-profiles-daemon": {
-      "format": "{icon}",
-      "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
-      "tooltip": true,
-      "format-icons": {
-        "default": "",
-        "performance": "",
-        "balanced": "",
-        "power-saver": ""
-      }
+    "custom/eco-mode": {
+        "exec": "test -f /tmp/eco_mode_state && cat /tmp/eco_mode_state || echo '⚡'",
+        "signal": 8,
+        "interval": "once",
+        "format": "{}",
+        "tooltip": true,
+        "tooltip-format": "Hyprland Eco Mode"
     },
     "network": {
         // "interface": "wlp2*", // (Optional) To force the use of this interface

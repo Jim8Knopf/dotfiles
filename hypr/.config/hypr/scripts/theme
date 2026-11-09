@@ -1,0 +1,35 @@
+#!/bin/sh
+set -eu
+
+config_dir=${XDG_CONFIG_HOME:-"$HOME/.config"}
+state_dir=${XDG_STATE_HOME:-"$HOME/.local/state"}/hypr-theme
+
+choice=$(printf '%s\n' 'Cat' 'Retro-Future Terminal' | wofi --dmenu --prompt 'Desktop style' --style "${XDG_RUNTIME_DIR:?}/hypr-theme-wofi.css") || exit 0
+case $choice in
+    Cat) theme='cat'; kde=HyprCat ;;
+    'Retro-Future Terminal') theme=retro; kde=HyprRetro ;;
+    *) exit 0 ;;
+esac
+
+mkdir -p "$state_dir/kde/color-schemes"
+printf '%s\n' "$theme" > "$state_dir/selected"
+
+# Render the selected theme and update compositor decorations without resetting eco mode.
+hyprctl eval 'hl.config(dofile(os.getenv("HOME") .. "/.config/hypr/conf/theme.lua").appearance)' >/dev/null
+# Restart from a config file rather than using Hyprpaper's IPC wallpaper setter,
+# which can cause high idle CPU usage on the installed version.
+systemctl --user restart hyprpaper.service
+# Ghostty supports reloading its configuration on SIGUSR2.
+pkill -USR2 -x ghostty 2>/dev/null || :
+if command -v plasma-apply-colorscheme >/dev/null; then
+    XDG_DATA_HOME="$state_dir/kde" plasma-apply-colorscheme "$kde"
+fi
+
+# KDE may rewrite GTK's entry points when changing its color scheme. Preserve
+# their existing contents while ensuring they include the selected colors.
+for version in gtk-3.0 gtk-4.0; do
+    gtk_css=$config_dir/$version/gtk.css
+    if [ -f "$gtk_css" ] && ! grep -Fq "../../.local/state/hypr-theme/gtk.css" "$gtk_css"; then
+        printf "\n@import url('../../.local/state/hypr-theme/gtk.css');\n" >> "$gtk_css"
+    fi
+done

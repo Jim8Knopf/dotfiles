@@ -20,6 +20,7 @@ return function(programs)
     hl.bind(main_mod .. " + F", hl.dsp.window.float({ action = "toggle" }))
     hl.bind(main_mod .. " + V", hl.dsp.exec_cmd("cliphist list | wofi --dmenu | cliphist decode | wl-copy"))
     hl.bind(main_mod .. " + space", hl.dsp.exec_cmd(programs.menu))
+    hl.bind(main_mod .. " + SHIFT + T", hl.dsp.exec_cmd('"$HOME/.config/hypr/scripts/theme"'))
     hl.bind(main_mod .. " + P", hl.dsp.window.pseudo())
     hl.bind(main_mod .. " + U", hl.dsp.layout("togglesplit"))
     

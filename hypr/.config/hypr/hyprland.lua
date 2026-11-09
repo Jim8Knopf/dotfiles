@@ -10,12 +10,14 @@ end
 
 -- Shared program names used by autostart and keybinds.
 local programs = load_config("programs.lua")
+local theme = load_config("theme.lua")
 
 -- Load order matters when later files refer to values from earlier ones.
 load_config("monitors.lua")
-load_config("autostart.lua")(programs)
+load_config("autostart.lua")(programs, theme)
 load_config("env.lua")
 load_config("appearance.lua")
+hl.config(theme.appearance)
 load_config("input.lua")
 load_config("keybinds.lua")(programs)
 load_config("rules.lua")

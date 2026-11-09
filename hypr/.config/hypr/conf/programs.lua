@@ -3,7 +3,7 @@
 return {
     terminal = "ghostty",
     file_manager = "dolphin",
-    menu = "wofi --show drun",
+    menu = 'wofi --show drun --style "$XDG_RUNTIME_DIR/hypr-theme-wofi.css"',
     browser = "firefox",
     code = "code",
     lock = "hyprlock",

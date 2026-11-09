@@ -7,5 +7,13 @@ pacman -S stow
 ```
 
 ```bash
-stow hypr waybar
+stow --target="$HOME" hypr waybar
+```
+
+Link the additional packages with:
+
+```bash
+stow --target="$HOME" ghostty wallpapers
+stow --target="$HOME" --no-folding hyprpaper
+systemctl --user daemon-reload
 ```

@@ -1,6 +1,7 @@
 
 // -*- mode: jsonc -*-
 {
+    "reload_style_on_change": true,
     // "layer": "top", // Waybar at top layer
     // "position": "bottom", // Waybar position (top|bottom|left|right)
     "height": 30, // Waybar height (to be removed for auto height)
@@ -23,6 +24,7 @@
         "network",
         "cpu",
         "memory",
+        "disk",
         "temperature",
         "backlight",
         "keyboard-state",
@@ -39,7 +41,8 @@
         "disable-scroll": true,
         "all-outputs": true,
         "warp-on-scroll": false,
-        "format": "{name}: {icon}",
+        "format": "{name}",
+        "persistent-workspaces": { "*": 5 },
         "format-icons": {
             "1": "",
             "2": "",
@@ -125,6 +128,11 @@
     },
     "memory": {
         "format": "{}% "
+    },
+    "disk": {
+        "path": "/",
+        "format": "{percentage_used}% ",
+        "tooltip-format": "Disk: {used} used of {total}"
     },
     "temperature": {
         // "thermal-zone": 2,

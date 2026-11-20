@@ -51,4 +51,4 @@ copy-on-select = false
 confirm-close-surface = false
 
 # Desktop theme, maintained by the Hyprland theme selector.
-config-file = ?../../.local/state/hypr-theme/ghostty.conf
+config-file = ?../desktop-theme/ghostty.conf

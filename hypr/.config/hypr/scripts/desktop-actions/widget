@@ -1,0 +1,47 @@
+#!/bin/sh
+set -eu
+
+widget=${1:-}
+set --
+case $widget in
+    monitor) window_title=waybar-system-monitor; command=btop ;;
+    network) window_title=waybar-network-settings; command=nmtui ;;
+    music) window_title=waybar-cliamp; command=cliamp; set -- --start-theme hypr-desktop ;;
+    rustnet) window_title=waybar-rustnet; command=sudo; set -- rustnet ;;
+    *) echo 'Usage: actions widget monitor|network|music|rustnet' >&2; exit 2 ;;
+esac
+runtime=${XDG_RUNTIME_DIR:?XDG_RUNTIME_DIR is required}
+exec 9>"$runtime/$window_title.lock"
+flock -n 9 || exit 0
+find_window() {
+    hyprctl -j clients | jq -r --arg title "$window_title" \
+        'first(.[] | select(.initialTitle == $title or .title == $title) | .address) // empty'
+}
+address=$(find_window) || exit 1
+if [ -n "$address" ]; then
+    exec hyprctl dispatch "hl.dsp.focus({ window = 'address:$address' })"
+fi
+if [ "$command" = cliamp ] && playerctl -l 2>/dev/null | grep -qx cliamp; then
+    notify-send 'Cliamp is already running' 'Return to its existing terminal to control it.'
+    exit 0
+fi
+config=${XDG_CONFIG_HOME:-"$HOME/.config"}
+terminal=$(WIDGET_PROGRAMS="$config/hypr/conf/programs.lua" lua -e 'io.write(assert(dofile(os.getenv("WIDGET_PROGRAMS")).terminal))')
+# Terminals use different title options. For other terminals, use the common
+# -e convention and set the title with the standard terminal escape sequence.
+# Variables in the fallback command are expanded by the child shell.
+# shellcheck disable=SC2016
+case ${terminal##*/} in
+    ghostty) "$terminal" --gtk-single-instance=false "--title=$window_title" -e "$command" "$@" 9>&- & ;;
+    kitty|foot|alacritty) "$terminal" --title "$window_title" -e "$command" "$@" 9>&- & ;;
+    xterm) "$terminal" -T "$window_title" -e "$command" "$@" 9>&- & ;;
+    *) "$terminal" -e sh -c 'printf "\033]0;%s\007" "$1"; shift; exec "$@"' sh "$window_title" "$command" "$@" 9>&- & ;;
+esac
+# Hold the lock until Hyprland registers the window, so quick clicks share it.
+count=0
+while [ "$count" -lt 40 ]; do
+    sleep 0.1
+    address=$(find_window) || exit 1
+    [ -z "$address" ] || break
+    count=$((count + 1))
+done

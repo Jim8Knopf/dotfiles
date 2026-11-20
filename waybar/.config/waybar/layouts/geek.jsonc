@@ -1,0 +1,97 @@
+[
+  {
+    "include": "@WAYBAR_MODULES@",
+    "name": "geek-main",
+    "position": "top",
+    "height": 32,
+    "modules-left": [
+      "ext/workspaces",
+      "hyprland/mode",
+      "hyprland/scratchpad"
+    ],
+    "modules-center": [
+      "hyprland/window"
+    ],
+    "modules-right": [
+      "custom/cliamp",
+      "mpris",
+      "idle_inhibitor",
+      "pulseaudio",
+      "backlight",
+      "keyboard-state",
+      "hyprland/language",
+      "clock",
+      "tray",
+      "custom/desktop",
+      "custom/appearance",
+      "custom/media-panel",
+      "custom/power"
+    ]
+  },
+  {
+    "include": "@WAYBAR_MODULES@",
+    "name": "geek-monitor",
+    "position": "bottom",
+    "height": 28,
+    "modules-left": [
+      "cpu",
+      "memory",
+      "temperature",
+      "disk"
+    ],
+    "modules-center": [
+      "custom/system-label"
+    ],
+    "modules-right": [
+      "custom/listeners",
+      "network",
+      "battery",
+      "battery#bat2",
+      "custom/eco-mode"
+    ],
+    "network": {
+      "interval": 2,
+      "format-wifi": " {ipaddr}  ↓ {bandwidthDownBytes} ↑ {bandwidthUpBytes}",
+      "format-ethernet": " {ipaddr}  ↓ {bandwidthDownBytes} ↑ {bandwidthUpBytes}",
+      "format-linked": "{ifname} (No IP)",
+      "format-disconnected": "Disconnected ⚠",
+      "tooltip-format-wifi": "{essid} ({signalStrength}%)\nInterface: {ifname}\nIP: {ipaddr}\nLeft click: RustNet\nRight click: network settings",
+      "tooltip-format-ethernet": "Interface: {ifname}\nIP: {ipaddr}\nLeft click: RustNet\nRight click: network settings",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" widget rustnet"
+    },
+    "cpu": {
+      "format": "CPU {usage}%",
+      "tooltip-format": "CPU: {usage}%\nLoad: {load}\nClick: system monitor",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" widget monitor"
+    },
+    "memory": {
+      "format": "RAM {}%",
+      "tooltip-format": "Memory: {used:0.1f} / {total:0.1f} GiB\nClick: system monitor",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" widget monitor"
+    },
+    "disk": {
+      "path": "/",
+      "format": "DISK {percentage_used}%",
+      "tooltip-format": "Disk: {used} used of {total}\nClick: open files",
+      "on-click": "@FILE_MANAGER_ROOT@"
+    },
+    "temperature": {
+      "format": "TEMP {temperatureC}°C",
+      "critical-threshold": 80,
+      "tooltip-format": "Temperature: {temperatureC}°C\nClick: system monitor",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" widget monitor"
+    },
+    "custom/system-label": {
+      "format": "SYSTEM // STATUS",
+      "tooltip": false
+    },
+    "custom/listeners": {
+      "exec": "if sockets=$(ss -H -ltn 2>/dev/null); then printf '%s\\n' \"$sockets\" | awk '{print $4}' | jq -Rsc 'split(\"\\n\") | map(select(length > 0)) as $addresses | [$addresses[] | split(\":\") | last] | unique as $ports | {text: (\"PORTS \" + ($ports | length | tostring)), tooltip: ((\"Listening TCP addresses:\\n\" + (if ($addresses|length) > 0 then ($addresses | join(\"\\n\")) else \"None\" end) + \"\\nClick: open RustNet\") | @html)}'; else jq -nc '{text:\"PORTS ?\", tooltip:\"Unable to read listening sockets\", class:\"error\"}'; fi",
+      "return-type": "json",
+      "interval": 10,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" widget rustnet",
+      "tooltip": true,
+      "exec-on-event": false
+    }
+  }
+]

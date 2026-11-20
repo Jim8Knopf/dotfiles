@@ -1,7 +1,7 @@
 -- Hyprland Lua config.
 -- Since Hyprland 0.55 the preferred entry point is hyprland.lua.
 
-local config_dir = os.getenv("HOME") .. "/.config/hypr"
+local config_dir = (os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/hypr"
 
 -- Keep this file small: each file in conf/ owns one area of the desktop.
 local function load_config(file)

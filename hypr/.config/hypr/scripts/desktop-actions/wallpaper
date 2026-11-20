@@ -1,0 +1,28 @@
+#!/bin/sh
+set -eu
+
+state=${XDG_STATE_HOME:-"$HOME/.local/state"}/hypr-theme
+folder=${XDG_DATA_HOME:-"$HOME/.local/share"}/hypr-themes/wallpapers
+mkdir -p "$state"
+case ${1:-} in
+  list)
+    find "$folder" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -print0 | jq -Rs 'split("\u0000") | map(select(length > 0)) | sort'
+    ;;
+  set)
+    file=$(realpath -e -- "${2:?wallpaper required}")
+    dir=$(realpath -e -- "$folder")
+    case $file in "$dir"/*) ;; *) echo 'Wallpaper must be in the wallpaper directory' >&2; exit 1 ;; esac
+    case $file in *'
+'*) echo 'Wallpaper path cannot contain a newline' >&2; exit 1 ;; esac
+    printf '%s\n' "$file" > "$state/wallpaper.tmp"
+    mv "$state/wallpaper.tmp" "$state/wallpaper"
+    lua "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/render-theme.lua"
+    systemctl --user restart hyprpaper.service
+    ;;
+  reset)
+    : > "$state/wallpaper"
+    lua "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/render-theme.lua"
+    systemctl --user restart hyprpaper.service
+    ;;
+  *) echo 'Usage: wallpaper list|set PATH|reset' >&2; exit 2 ;;
+esac

@@ -13,7 +13,8 @@ stow --target="$HOME" hypr waybar
 Link the additional packages with:
 
 ```bash
-stow --target="$HOME" ghostty wallpapers
+stow --target="$HOME" ghostty wallpapers signal
+stow --target="$HOME" --no-folding cliamp quickshell
 stow --target="$HOME" --no-folding hyprpaper
 systemctl --user daemon-reload
 ```

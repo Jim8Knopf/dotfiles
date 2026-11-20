@@ -1,0 +1,35 @@
+{
+  "include": "@WAYBAR_MODULES@",
+  "name": "retro",
+  "position": "bottom",
+  "height": 32,
+  "modules-left": [
+    "ext/workspaces",
+    "custom/retro-terminal"
+  ],
+  "modules-center": [
+    "hyprland/window"
+  ],
+  "modules-right": [
+    "custom/cliamp",
+    "mpris",
+    "cpu",
+    "memory",
+    "network",
+    "clock",
+    "tray",
+    "custom/desktop",
+    "custom/appearance",
+    "custom/media-panel",
+    "custom/power"
+  ],
+  "custom/retro-terminal": {
+    "format": ">_ TERMINAL",
+    "tooltip-format": "Open a terminal",
+    "on-click": "@TERMINAL@"
+  },
+  "clock": {
+    "format": "{:%Y-%m-%d %H:%M}",
+    "tooltip-format": "<tt>{calendar}</tt>"
+  }
+}

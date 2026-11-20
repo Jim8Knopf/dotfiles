@@ -1,0 +1,27 @@
+{
+  "include": "@WAYBAR_MODULES@",
+  "name": "hyprland",
+  "position": "top",
+  "height": 36,
+  "modules-left": [
+    "ext/workspaces",
+    "hyprland/window"
+  ],
+  "modules-center": [
+    "clock"
+  ],
+  "modules-right": [
+    "custom/cliamp",
+    "mpris",
+    "idle_inhibitor",
+    "pulseaudio",
+    "backlight",
+    "network",
+    "battery",
+    "tray",
+    "custom/desktop",
+    "custom/appearance",
+    "custom/media-panel",
+    "custom/power"
+  ]
+}

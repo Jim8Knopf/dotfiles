@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+
+action=${1:-toggle}
+case $action in toggle|apps|appearance|media) ;; *) exit 2 ;; esac
+if ! command -v qs >/dev/null 2>&1; then
+    if [ "$action" = apps ]; then
+        exec wofi --show drun --style "${XDG_RUNTIME_DIR:?}/hypr-theme-wofi.css"
+    fi
+    notify-send 'Desktop controls unavailable' 'Install the quickshell package to use this panel.'
+    exit 1
+fi
+if qs -c desktop ipc call desktop "$action" >/dev/null 2>&1; then
+    exit 0
+fi
+qs -c desktop -n -d
+attempt=0
+while [ "$attempt" -lt 30 ]; do
+    if qs -c desktop ipc call desktop "$action" >/dev/null 2>&1; then
+        exit 0
+    fi
+    sleep 0.1
+    attempt=$((attempt + 1))
+done
+if [ "$action" = apps ]; then
+    exec wofi --show drun --style "${XDG_RUNTIME_DIR:?}/hypr-theme-wofi.css"
+fi
+notify-send 'Desktop controls unavailable' 'Quickshell did not start. Check its logs with qs log.'
+exit 1

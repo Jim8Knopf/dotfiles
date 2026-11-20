@@ -1,0 +1,87 @@
+* {
+    font-family: "JetBrainsMono Nerd Font", "DejaVu Sans", sans-serif;
+    font-size: 12px;
+}
+
+window#waybar {
+    background: #@background@;
+    color: #@foreground@;
+    border-bottom: 2px solid #@accent@;
+}
+
+#workspaces {
+    margin: 3px 8px;
+}
+
+#workspaces button {
+    color: #@foreground@;
+    background: #@muted@;
+    border: 1px solid transparent;
+    border-radius: @rounding@px;
+    min-width: 22px;
+    padding: 0 5px;
+    margin: 0 2px;
+}
+
+#workspaces button.active {
+    background: #@accent@;
+    color: #@background@;
+    border-color: #@foreground@;
+    font-weight: bold;
+}
+
+#workspaces button.urgent {
+    background: #d95c58;
+    color: #ffffff;
+}
+
+#workspaces button:hover {
+    border-color: #@accent@;
+}
+
+#window {
+    color: #@foreground@;
+}
+
+#cpu,
+#memory,
+#disk,
+#temperature,
+#network,
+#battery,
+#backlight,
+#pulseaudio,
+#clock,
+#tray,
+#custom-eco-mode,
+#language,
+#keyboard-state,
+#idle_inhibitor,
+#custom-power,
+#custom-desktop,
+#custom-appearance,
+#custom-media-panel,
+#custom-cliamp,
+#mpris,
+#mpd,
+#custom-media {
+    padding: 0 6px;
+}
+
+#cpu,
+#memory,
+#disk,
+#temperature {
+    color: #@accent@;
+}
+
+#battery.warning,
+#temperature.critical {
+    color: #@error@;
+}
+
+tooltip {
+    background: #@background@;
+    color: #@foreground@;
+    border: 1px solid #@accent@;
+}

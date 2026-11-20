@@ -1,0 +1,50 @@
+#!/bin/sh
+set -eu
+
+state_dir=${XDG_STATE_HOME:-"$HOME/.local/state"}/hypr-theme
+
+catalog=${XDG_RUNTIME_DIR:?}/hypr-theme.json
+if [ "$#" -gt 0 ]; then
+    choice=$1
+else
+    choice=$(jq -r '.themes[] | .title' "$catalog" | wofi --dmenu --prompt 'Desktop style' --style "$XDG_RUNTIME_DIR/hypr-theme-wofi.css") || exit 0
+fi
+theme=$(jq -r --arg choice "$choice" '.themes[] | select(.id == $choice or .title == $choice) | .id' "$catalog")
+[ -n "$theme" ] || { echo "Unknown theme: $choice" >&2; exit 2; }
+
+mkdir -p "$state_dir/kde/color-schemes"
+previous=$(cat "$state_dir/selected" 2>/dev/null || printf 'hyprland')
+printf '%s\n' "$theme" > "$state_dir/selected"
+
+# Render the selected theme and update compositor decorations without resetting eco mode.
+if result=$(lua "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/render-theme.lua" 2>&1) && result=$(hyprctl eval 'hl.config(dofile((os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/hypr/conf/theme.lua").appearance)' 2>&1) && [ "$result" = ok ]; then
+    :
+else
+    printf '%s\n' "$previous" > "$state_dir/selected"
+    lua "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/render-theme.lua" >/dev/null 2>&1 || :
+    notify-send 'Theme change failed' 'Could not update Hyprland. Check the desktop session.' 2>/dev/null || :
+    printf '%s\n' "Theme change failed: $result" >&2
+    exit 1
+fi
+# Reload the running bar's configuration to apply the selected layout.
+pkill -USR2 -u "$(id -u)" -x waybar 2>/dev/null || :
+# Restart from a config file rather than using Hyprpaper's IPC wallpaper setter,
+# which can cause high idle CPU usage on the installed version.
+systemctl --user restart hyprpaper.service
+# Ghostty supports reloading its configuration on SIGUSR2.
+pkill -USR2 -x ghostty 2>/dev/null || :
+kde=$(jq -r .kde "$catalog")
+if command -v cliamp >/dev/null 2>&1; then
+    cliamp theme hypr-desktop >/dev/null 2>&1 || :
+fi
+if command -v plasma-apply-colorscheme >/dev/null; then
+    XDG_DATA_HOME="$state_dir/kde" plasma-apply-colorscheme "$kde"
+fi
+# Use the dark system icon set for applications that follow the GTK preference.
+if command -v gsettings >/dev/null; then
+    gsettings set org.gnome.desktop.interface icon-theme 'breeze-dark' || :
+    gsettings set org.blueman.general symbolic-status-icons true || :
+fi
+
+# KDE may rewrite GTK entry points; restore the generated import.
+lua "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/render-theme.lua"

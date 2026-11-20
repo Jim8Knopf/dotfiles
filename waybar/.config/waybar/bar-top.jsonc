@@ -9,15 +9,16 @@
     "spacing": 4, // Gaps between modules (4px)
     // Choose the order of the modules
     "modules-left": [
-        "hyprland/workspaces",
+        "ext/workspaces",
         "hyprland/mode",
-        "hyprland/scratchpad",
-        "custom/media"
+        "hyprland/scratchpad"
     ],
     "modules-center": [
         "hyprland/window"
     ],
     "modules-right": [
+        "custom/cliamp",
+        "mpris",
         "mpd",
         "idle_inhibitor",
         "pulseaudio",
@@ -34,15 +35,17 @@
         "custom/eco-mode",
         "clock",
         "tray",
+        "custom/desktop",
+        "custom/appearance",
+        "custom/media-panel",
         "custom/power"
     ],
     // Modules configuration
-    "hyprland/workspaces": {
-        "disable-scroll": true,
+    "ext/workspaces": {
+        "on-click": "activate",
         "all-outputs": true,
-        "warp-on-scroll": false,
+        "sort-by-name": true,
         "format": "{name}",
-        "persistent-workspaces": { "*": 5 },
         "format-icons": {
             "1": "",
             "2": "",
@@ -68,6 +71,10 @@
     },
     "hyprland/mode": {
         "format": "<span style=\"italic\">{}</span>"
+    },
+    "hyprland/window": {
+        "tooltip-format": "{title}\nClick: choose a workspace",
+        "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" workspace"
     },
     "hyprland/scratchpad": {
         "format": "{icon} {count}",
@@ -110,12 +117,42 @@
         }
     },
     "tray": {
+        "show-passive-items": true,
         // "icon-size": 21,
         "spacing": 10,
         // "icons": {
         //   "blueman": "bluetooth",
         //   "TelegramDesktop": "$HOME/.local/share/icons/hicolor/16x16/apps/telegram.png"
         // }
+    },
+    "custom/cliamp": {
+        "format": "♫",
+        "tooltip-format": "Open Cliamp",
+        "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" widget music"
+    },
+    "custom/desktop": {
+        "format": "⚙",
+        "tooltip-format": "Quick settings · Super+Alt+S",
+        "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" panel"
+    },
+    "custom/appearance": {
+        "format": "◈",
+        "tooltip-format": "Appearance · Super+Shift+T",
+        "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" panel appearance"
+    },
+    "custom/media-panel": {
+        "format": "▶",
+        "tooltip-format": "Media controls · Super+Shift+M",
+        "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" panel media"
+    },
+    "mpris": {
+        "format": "{status_icon} {dynamic}",
+        "format-paused": "{status_icon} {dynamic}",
+        "status-icons": { "playing": "▶", "paused": "⏸", "stopped": "■" },
+        "dynamic-order": ["artist", "title"],
+        "dynamic-len": 35,
+        "title-len": 25,
+        "tooltip-format": "{player}: {status}\n{dynamic}\nLeft: play/pause · Middle: previous · Right: next"
     },
     "clock": {
         // "timezone": "America/New_York",
@@ -124,15 +161,19 @@
     },
     "cpu": {
         "format": "{usage}% ",
-        "tooltip": false
+        "tooltip-format": "CPU: {usage}%\nLoad: {load}\nClick: system monitor",
+        "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" widget monitor"
     },
     "memory": {
-        "format": "{}% "
+        "format": "{}% ",
+        "tooltip-format": "Memory: {used:0.1f} / {total:0.1f} GiB\nClick: system monitor",
+        "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" widget monitor"
     },
     "disk": {
         "path": "/",
         "format": "{percentage_used}% ",
-        "tooltip-format": "Disk: {used} used of {total}"
+        "tooltip-format": "Disk: {used} used of {total}\nClick: open files",
+        "on-click": "@FILE_MANAGER_ROOT@"
     },
     "temperature": {
         // "thermal-zone": 2,
@@ -140,11 +181,16 @@
         "critical-threshold": 80,
         // "format-critical": "{temperatureC}°C {icon}",
         "format": "{temperatureC}°C {icon}",
+        "tooltip-format": "Temperature: {temperatureC}°C\nClick: system monitor",
+        "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" widget monitor",
         "format-icons": ["", "", ""]
     },
     "backlight": {
         // "device": "acpi_video1",
         "format": "{percent}% {icon}",
+        "tooltip-format": "Brightness: {percent}%\nScroll: adjust brightness",
+        "on-scroll-up": "brightnessctl set 5%+",
+        "on-scroll-down": "brightnessctl set 5%-",
         "format-icons": ["", "", "", "", "", "", "", "", ""]
     },
     "battery": {
@@ -177,10 +223,12 @@
         // "interface": "wlp2*", // (Optional) To force the use of this interface
         "format-wifi": "{essid} ({signalStrength}%) ",
         "format-ethernet": "{ipaddr}/{cidr} ",
-        "tooltip-format": "{ifname} via {gwaddr} ",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%)\nInterface: {ifname}\nIP: {ipaddr}\nRight click: network connections",
+        "tooltip-format-ethernet": "Interface: {ifname}\nIP: {ipaddr}\nRight click: network connections",
+        "tooltip-format-disconnected": "Disconnected\nRight click: network connections",
+        "on-click-right": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" widget network",
         "format-linked": "{ifname} (No IP) ",
-        "format-disconnected": "Disconnected ⚠",
-        "format-alt": "{ifname}: {ipaddr}/{cidr}"
+        "format-disconnected": "Disconnected ⚠"
     },
     "pulseaudio": {
         // "scroll-step": 1, // %, can be a float
@@ -199,30 +247,12 @@
             "car": "",
             "default": ["", "", ""]
         },
-        "on-click": "pavucontrol"
-    },
-    "custom/media": {
-        "format": "{icon} {text}",
-        "return-type": "json",
-        "max-length": 40,
-        "format-icons": {
-            "spotify": "",
-            "default": "🎜"
-        },
-        "escape": true,
-        "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
-        // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
+        "on-click": "systemsettings kcm_pulseaudio",
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
     },
     "custom/power": {
-        "format" : "⏻ ",
-		"tooltip": false,
-		"menu": "on-click",
-		"menu-file": "$HOME/.config/waybar/power_menu.xml", // Menu file in resources folder
-		"menu-actions": {
-			"shutdown": "shutdown",
-			"reboot": "reboot",
-			"suspend": "systemctl suspend",
-			"hibernate": "systemctl hibernate"
-		}
+        "format": "⏻ ",
+        "tooltip-format": "Power menu",
+        "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts/desktop\" power"
     }
 }

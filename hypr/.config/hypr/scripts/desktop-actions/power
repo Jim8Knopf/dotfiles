@@ -1,0 +1,26 @@
+#!/bin/sh
+set -eu
+
+style=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hypr-theme-wofi.css
+choose() {
+    if [ -f "$style" ]; then
+        wofi --dmenu --prompt "$1" --style "$style"
+    else
+        wofi --dmenu --prompt "$1"
+    fi
+}
+
+choice=$(printf '%s\n' 'Lock' 'Suspend' 'Hibernate' 'Restart' 'Shut down' | choose 'Power') || exit 0
+case $choice in
+    Lock) exec hyprlock ;;
+    Suspend) exec systemctl suspend ;;
+    Hibernate) exec systemctl hibernate ;;
+    Restart|"Shut down")
+        confirm=$(printf '%s\n' 'Cancel' "$choice" | choose "Confirm $choice") || exit 0
+        [ "$confirm" = "$choice" ] || exit 0
+        case $choice in
+            Restart) exec systemctl reboot ;;
+            'Shut down') exec systemctl poweroff ;;
+        esac
+        ;;
+esac

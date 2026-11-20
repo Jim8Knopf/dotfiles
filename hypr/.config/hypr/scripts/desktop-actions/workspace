@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+style=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hypr-theme-wofi.css
+if [ -f "$style" ]; then
+    choice=$(seq 1 10 | wofi --dmenu --prompt 'Switch workspace' --style "$style") || exit 0
+else
+    choice=$(seq 1 10 | wofi --dmenu --prompt 'Switch workspace') || exit 0
+fi
+case $choice in
+    1|2|3|4|5|6|7|8|9|10) exec hyprctl dispatch "hl.dsp.focus({ workspace = $choice })" ;;
+esac

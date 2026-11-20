@@ -1,0 +1,11 @@
+#!/bin/sh
+# Shared entry point for Hyprland, QuickShell, and Waybar.
+set -eu
+action=${1:-}
+[ "$#" -eq 0 ] || shift
+case $action in
+    panel|theme|wallpaper|widget|power|workspace)
+        script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+        exec "$script_dir/desktop-actions/$action" "$@" ;;
+    *) echo 'Usage: desktop panel|theme|wallpaper|widget|power|workspace [arguments...]' >&2; exit 2 ;;
+esac
